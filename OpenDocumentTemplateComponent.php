@@ -1,7 +1,12 @@
 <?php
 /*
+ * Project page: https://github.com/xv1t/cakephp-opendocument-template
+ * Author: Fedotov Viktor, xv1t@yandex.ru 2014
+ * 
  * This class works with ods, odt file in CakePHP style data template
- * like: [Document.name]
+ * like: [Document.name]. 
+ * 
+ * Please read documentaton on the official project page
  * 
  * before using
  * add to controller components array
@@ -13,11 +18,6 @@
  *      cd
  * 
  * Tested on LibreOffice 4.2, Ubuntu 14.04
- * 
- * BUGS AND WARNINGS
- * ODS:
- *  pictures:
- *  area ranges
  * 
  */
 App::uses('Component', 'Controller');
