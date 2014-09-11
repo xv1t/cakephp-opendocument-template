@@ -349,7 +349,7 @@ class OpenDocumentTemplateComponent extends Component {
         }
 
         /*
-         * Поиск через вероятных предков
+         * РџРѕРёСЃРє С‡РµСЂРµР· РІРµСЂРѕСЏС‚РЅС‹С… РїСЂРµРґРєРѕРІ
          */
         foreach ($this->ods['named-expression'] as $expression_name => $expr) {
             if (!empty($this->ods['named-expression'][$expression_name]['parent'])) {
@@ -358,8 +358,8 @@ class OpenDocumentTemplateComponent extends Component {
 
                     if (count($this->ods['named-expression'][$expression_name]['parent']) > 1) {
                         /*
-                         * Если родителей указано несколько, выбираем только того
-                         * кто ближе, а следовательно у кого меньше length
+                         * Р•СЃР»Рё СЂРѕРґРёС‚РµР»РµР№ СѓРєР°Р·Р°РЅРѕ РЅРµСЃРєРѕР»СЊРєРѕ, РІС‹Р±РёСЂР°РµРј С‚РѕР»СЊРєРѕ С‚РѕРіРѕ
+                         * РєС‚Рѕ Р±Р»РёР¶Рµ, Р° СЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ Сѓ РєРѕРіРѕ РјРµРЅСЊС€Рµ length
                          */
                         $nearest = array(
                             'name' => false,
@@ -375,8 +375,8 @@ class OpenDocumentTemplateComponent extends Component {
                         }
                         if ($nearest['name']) {
                             /*
-                             * Удаляем связи children От этого массива из 
-                             * вероятных предков
+                             * РЈРґР°Р»СЏРµРј СЃРІСЏР·Рё children РћС‚ СЌС‚РѕРіРѕ РјР°СЃСЃРёРІР° РёР· 
+                             * РІРµСЂРѕСЏС‚РЅС‹С… РїСЂРµРґРєРѕРІ
                              */
 
                             foreach ($this->ods['named-expression'][$expression_name]['parent'] as $par) {
@@ -398,7 +398,7 @@ class OpenDocumentTemplateComponent extends Component {
         }
 
         /*
-         * Фильтрация через потомков
+         * Р¤РёР»СЊС‚СЂР°С†РёСЏ С‡РµСЂРµР· РїРѕС‚РѕРјРєРѕРІ
          */
         foreach ($this->ods['named-expression'] as $expression_name => $expr) {
             if (
@@ -417,7 +417,7 @@ class OpenDocumentTemplateComponent extends Component {
         }
 
         /*
-         * пометка именованных областей
+         * РїРѕРјРµС‚РєР° РёРјРµРЅРѕРІР°РЅРЅС‹С… РѕР±Р»Р°СЃС‚РµР№
          */
         foreach ($this->ods['named-expression'] as $expression_name => $expr) {
             if (
@@ -425,7 +425,7 @@ class OpenDocumentTemplateComponent extends Component {
                     empty($expr['children'])
             ) {
                 /*
-                 * нет ни предков ни потомков
+                 * РЅРµС‚ РЅРё РїСЂРµРґРєРѕРІ РЅРё РїРѕС‚РѕРјРєРѕРІ
                  */
                 $this->ods['named-expression'][$expression_name]['type'] = 'once';
             }
@@ -434,7 +434,7 @@ class OpenDocumentTemplateComponent extends Component {
                     !empty($expr['children'])
             ) {
                 /*
-                 * первый предок в блоке
+                 * РїРµСЂРІС‹Р№ РїСЂРµРґРѕРє РІ Р±Р»РѕРєРµ
                  */
                 $this->ods['named-expression'][$expression_name]['type'] = 'first';
             }
@@ -443,7 +443,7 @@ class OpenDocumentTemplateComponent extends Component {
                     !empty($expr['children'])
             ) {
                 /*
-                 * гдето посредине
+                 * РіРґРµС‚Рѕ РїРѕСЃСЂРµРґРёРЅРµ
                  */
                 $this->ods['named-expression'][$expression_name]['type'] = 'meddle';
             }
@@ -452,14 +452,14 @@ class OpenDocumentTemplateComponent extends Component {
                     empty($expr['children'])
             ) {
                 /*
-                 * краыний предок, крайнее некуда
+                 * РєСЂР°С‹РЅРёР№ РїСЂРµРґРѕРє, РєСЂР°Р№РЅРµРµ РЅРµРєСѓРґР°
                  */
                 $this->ods['named-expression'][$expression_name]['type'] = 'last';
             }
         }
 
         /*
-         * Пометка объектов рядок по областям
+         * РџРѕРјРµС‚РєР° РѕР±СЉРµРєС‚РѕРІ СЂСЏРґРѕРє РїРѕ РѕР±Р»Р°СЃС‚СЏРј
          */
 
         foreach ($this->ods['named-expression'] as $expression_name => $expr) {
@@ -467,7 +467,7 @@ class OpenDocumentTemplateComponent extends Component {
             switch ($expr['type']) {
                 case 'once':
                     /*
-                     * смело помечаем все ячейки этого регоиона
+                     * СЃРјРµР»Рѕ РїРѕРјРµС‡Р°РµРј РІСЃРµ СЏС‡РµР№РєРё СЌС‚РѕРіРѕ СЂРµРіРѕРёРѕРЅР°
                      */
                     for ($i = $expr['start'] - 1; $i < $expr['end']; $i++) {
 
@@ -481,8 +481,8 @@ class OpenDocumentTemplateComponent extends Component {
 
                 case 'first':
                     /*
-                     * Старт блока 
-                     * первый уровень
+                     * РЎС‚Р°СЂС‚ Р±Р»РѕРєР° 
+                     * РїРµСЂРІС‹Р№ СѓСЂРѕРІРµРЅСЊ
                      */
                     for ($i = $expr['start'] - 1; $i < $expr['end']; $i++) {
                         $this->ods['office:spreadsheet']['table:table'][$sheet_number]['rows'][$i]['range'] = $expr['name'];
@@ -569,7 +569,7 @@ class OpenDocumentTemplateComponent extends Component {
                     }
 
                     /*
-                     * Хорош с уровнями вложенности
+                     * РҐРѕСЂРѕС€ СЃ СѓСЂРѕРІРЅСЏРјРё РІР»РѕР¶РµРЅРЅРѕСЃС‚Рё
                      */
 
                     break;
@@ -579,14 +579,14 @@ class OpenDocumentTemplateComponent extends Component {
             }
         }
         /*
-         * Блоки размечеены иерархически,
-         * теперь каждый блок выносим в отдельные габлоны строк
+         * Р‘Р»РѕРєРё СЂР°Р·РјРµС‡РµРµРЅС‹ РёРµСЂР°СЂС…РёС‡РµСЃРєРё,
+         * С‚РµРїРµСЂСЊ РєР°Р¶РґС‹Р№ Р±Р»РѕРє РІС‹РЅРѕСЃРёРј РІ РѕС‚РґРµР»СЊРЅС‹Рµ РіР°Р±Р»РѕРЅС‹ СЃС‚СЂРѕРє
          */
         $this->range_templates = array();
         $this->range_models = array();
         foreach ($this->ods['named-expression'] as $expression_name => $expr) {
             $sheet_number = $this->spreadsheet_get_sheet_index($expr['sheet']);
-            $this->range_models[] = $expr['modelName']; //<! Задно и перечислим все модкли которые не относятцца к телу документа а
+            $this->range_models[] = $expr['modelName']; //<! Р—Р°РґРЅРѕ Рё РїРµСЂРµС‡РёСЃР»РёРј РІСЃРµ РјРѕРґРєР»Рё РєРѕС‚РѕСЂС‹Рµ РЅРµ РѕС‚РЅРѕСЃСЏС‚С†С†Р° Рє С‚РµР»Сѓ РґРѕРєСѓРјРµРЅС‚Р° Р°
 
             $this->range_templates[$expression_name] = array_slice(
                     $this->ods['office:spreadsheet']['table:table'][$sheet_number]['rows'], $expr['start'] - 1, $expr['length']); /**/
@@ -594,8 +594,8 @@ class OpenDocumentTemplateComponent extends Component {
         }
 
         /*
-         * Теперь делаем рендер тела листа без циклов
-         * при этом не забыв из изходного массива удалить циклические ключи на время рендеринга. вот!
+         * РўРµРїРµСЂСЊ РґРµР»Р°РµРј СЂРµРЅРґРµСЂ С‚РµР»Р° Р»РёСЃС‚Р° Р±РµР· С†РёРєР»РѕРІ
+         * РїСЂРё СЌС‚РѕРј РЅРµ Р·Р°Р±С‹РІ РёР· РёР·С…РѕРґРЅРѕРіРѕ РјР°СЃСЃРёРІР° СѓРґР°Р»РёС‚СЊ С†РёРєР»РёС‡РµСЃРєРёРµ РєР»СЋС‡Рё РЅР° РІСЂРµРјСЏ СЂРµРЅРґРµСЂРёРЅРіР°. РІРѕС‚!
          */
         $data_for_body = $this->data;
         foreach ($this->range_models as $model) {
@@ -605,7 +605,7 @@ class OpenDocumentTemplateComponent extends Component {
         }
         $this->data_for_body_flatten = Hash::flatten($data_for_body);
         /*
-         * Делаем рендер тела всех листов
+         * Р”РµР»Р°РµРј СЂРµРЅРґРµСЂ С‚РµР»Р° РІСЃРµС… Р»РёСЃС‚РѕРІ
          */
 
         for ($sheet_ix = 0; $sheet_ix < count($this->ods['office:spreadsheet']['table:table']); $sheet_ix++) {
@@ -616,12 +616,12 @@ class OpenDocumentTemplateComponent extends Component {
         } 
 
         /*
-         * Ну а теперь самое интересное
-         * рендер всех блоков циклов что осталось на листах!
-         * начнем с блоков типа once
+         * РќСѓ Р° С‚РµРїРµСЂСЊ СЃР°РјРѕРµ РёРЅС‚РµСЂРµСЃРЅРѕРµ
+         * СЂРµРЅРґРµСЂ РІСЃРµС… Р±Р»РѕРєРѕРІ С†РёРєР»РѕРІ С‡С‚Рѕ РѕСЃС‚Р°Р»РѕСЃСЊ РЅР° Р»РёСЃС‚Р°С…!
+         * РЅР°С‡РЅРµРј СЃ Р±Р»РѕРєРѕРІ С‚РёРїР° once
          */
 
-        $this->range_render = array(); //Массив с готовыми блоками
+        $this->range_render = array(); //РњР°СЃСЃРёРІ СЃ РіРѕС‚РѕРІС‹РјРё Р±Р»РѕРєР°РјРё
         foreach ($this->ods['named-expression'] as $expression_name => $expr) {
 
             if (!empty($this->range_templates[$expression_name])) {
@@ -637,17 +637,17 @@ class OpenDocumentTemplateComponent extends Component {
                             foreach ($this->data[$model] as $datum0) {
 
                                 /*
-                                 * На этом этапе хорошо бы отбросить все дочерные модели 
-                                 * с перечислениями и делать флаттен!!!!!!!
+                                 * РќР° СЌС‚РѕРј СЌС‚Р°РїРµ С…РѕСЂРѕС€Рѕ Р±С‹ РѕС‚Р±СЂРѕСЃРёС‚СЊ РІСЃРµ РґРѕС‡РµСЂРЅС‹Рµ РјРѕРґРµР»Рё 
+                                 * СЃ РїРµСЂРµС‡РёСЃР»РµРЅРёСЏРјРё Рё РґРµР»Р°С‚СЊ С„Р»Р°С‚С‚РµРЅ!!!!!!!
                                  */
                                 
                                 $datum_flatten0 = array_merge(
                                         Hash::flatten($datum0), $this->data_for_body_flatten // Add a global values
                                 );
                                 /*
-                                 * применяем к строкам
-                                 * один проход
-                                 * соотвествует одному обхекту  и блоку
+                                 * РїСЂРёРјРµРЅСЏРµРј Рє СЃС‚СЂРѕРєР°Рј
+                                 * РѕРґРёРЅ РїСЂРѕС…РѕРґ
+                                 * СЃРѕРѕС‚РІРµСЃС‚РІСѓРµС‚ РѕРґРЅРѕРјСѓ РѕР±С…РµРєС‚Сѓ  Рё Р±Р»РѕРєСѓ
                                  */
                                 $rows0 = array();
                                 for ($i = 0; $i < count($this->range_templates[$expression_name]); $i++) {
@@ -657,17 +657,17 @@ class OpenDocumentTemplateComponent extends Component {
                                     $rows0[] = $row;
                                 }
                                 /*
-                                 * Проходим 3 уровня вложенности
+                                 * РџСЂРѕС…РѕРґРёРј 3 СѓСЂРѕРІРЅСЏ РІР»РѕР¶РµРЅРЅРѕСЃС‚Рё
                                  */
 
                                 if (!empty($expr['children'])) {
                                     /*
-                                     * Исходный шаблон это rows0
+                                     * РСЃС…РѕРґРЅС‹Р№ С€Р°Р±Р»РѕРЅ СЌС‚Рѕ rows0
                                      */
 
                                     foreach ($expr['children'] as $expr1_name) {
-                                        $rows1 = array(); //для накопления первого предка данными
-                                        //Подчиненных может быть несколько
+                                        $rows1 = array(); //РґР»СЏ РЅР°РєРѕРїР»РµРЅРёСЏ РїРµСЂРІРѕРіРѕ РїСЂРµРґРєР° РґР°РЅРЅС‹РјРё
+                                        //РџРѕРґС‡РёРЅРµРЅРЅС‹С… РјРѕР¶РµС‚ Р±С‹С‚СЊ РЅРµСЃРєРѕР»СЊРєРѕ
                                         $expr1 = $this->ods['named-expression'][$expr1_name];
                                         $model1 = $expr1['modelName'];
                                         if (!empty($datum0[$model1])) {
@@ -676,9 +676,9 @@ class OpenDocumentTemplateComponent extends Component {
                                                         Hash::flatten($datum1), $datum_flatten0, $this->data_for_body_flatten
                                                 );
                                                 /*
-                                                 * Мы на втором уровне
-                                                 * рендерим а=шаблонный набор
-                                                 * строк
+                                                 * РњС‹ РЅР° РІС‚РѕСЂРѕРј СѓСЂРѕРІРЅРµ
+                                                 * СЂРµРЅРґРµСЂРёРј Р°=С€Р°Р±Р»РѕРЅРЅС‹Р№ РЅР°Р±РѕСЂ
+                                                 * СЃС‚СЂРѕРє
                                                  */
                                                 for ($i = 0; $i < count($this->range_templates[$expr1_name]); $i++) {
                                                     $row1 = $this->range_templates[$expr1_name][$i];
@@ -706,8 +706,8 @@ class OpenDocumentTemplateComponent extends Component {
                                                             }
                                                         }
                                                         /*
-                                                         * место для третьего уровня
-                                                         * надо вставить данные
+                                                         * РјРµСЃС‚Рѕ РґР»СЏ С‚СЂРµС‚СЊРµРіРѕ СѓСЂРѕРІРЅСЏ
+                                                         * РЅР°РґРѕ РІСЃС‚Р°РІРёС‚СЊ РґР°РЅРЅС‹Рµ
                                                          */
                                                         list($range_start2, $range_end2, $range_length2) = $this->spreadsheet_get_current_range_pos($rows1, $expr2_name);
 
@@ -722,7 +722,7 @@ class OpenDocumentTemplateComponent extends Component {
                                         }
 
                                         /*
-                                         * Вставляем готовый блок предка
+                                         * Р’СЃС‚Р°РІР»СЏРµРј РіРѕС‚РѕРІС‹Р№ Р±Р»РѕРє РїСЂРµРґРєР°
                                          */
 
                                         list($range_start1, $range_end1, $range_length1) = $this->spreadsheet_get_current_range_pos($rows0, $expr1_name);
@@ -735,14 +735,14 @@ class OpenDocumentTemplateComponent extends Component {
                                     }
 
                                     /*
-                                     * присоединяем результаты предков в первый блок
+                                     * РїСЂРёСЃРѕРµРґРёРЅСЏРµРј СЂРµР·СѓР»СЊС‚Р°С‚С‹ РїСЂРµРґРєРѕРІ РІ РїРµСЂРІС‹Р№ Р±Р»РѕРє
                                      */
                                 }
 
                                 /*
-                                 * прошли вложенность
-                                 * и теперь публикуем отрендеренные страницы
-                                 * в хранилище рендеринга
+                                 * РїСЂРѕС€Р»Рё РІР»РѕР¶РµРЅРЅРѕСЃС‚СЊ
+                                 * Рё С‚РµРїРµСЂСЊ РїСѓР±Р»РёРєСѓРµРј РѕС‚СЂРµРЅРґРµСЂРµРЅРЅС‹Рµ СЃС‚СЂР°РЅРёС†С‹
+                                 * РІ С…СЂР°РЅРёР»РёС‰Рµ СЂРµРЅРґРµСЂРёРЅРіР°
                                  */
 
                                 $this->range_render[$expression_name] = array_merge(
@@ -751,7 +751,7 @@ class OpenDocumentTemplateComponent extends Component {
 
                             }
                             /*
-                             * Финальная стыковка
+                             * Р¤РёРЅР°Р»СЊРЅР°СЏ СЃС‚С‹РєРѕРІРєР°
                              */
                             list($range_start, $range_end, $range_length) = $this->spreadsheet_get_current_range_pos($sheet_number, $expression_name);
 
@@ -772,7 +772,7 @@ class OpenDocumentTemplateComponent extends Component {
                                         Hash::flatten($datum), $this->data_for_body_flatten // Add a global values
                                 );
                                 /*
-                                 * применяем к строкам
+                                 * РїСЂРёРјРµРЅСЏРµРј Рє СЃС‚СЂРѕРєР°Рј
                                  */
                                 for ($i = 0; $i < count($this->range_templates[$expression_name]); $i++) {
                                     $row = $this->range_templates[$expression_name][$i];
@@ -780,7 +780,7 @@ class OpenDocumentTemplateComponent extends Component {
                                 }
                             }
                             /*
-                             * теперь подсовываем результат в меесто шаблонных строк
+                             * С‚РµРїРµСЂСЊ РїРѕРґСЃРѕРІС‹РІР°РµРј СЂРµР·СѓР»СЊС‚Р°С‚ РІ РјРµРµСЃС‚Рѕ С€Р°Р±Р»РѕРЅРЅС‹С… СЃС‚СЂРѕРє
                              */
 
                             list($range_start, $range_end, $range_length) = $this->spreadsheet_get_current_range_pos($sheet_number, $expression_name);
@@ -856,8 +856,8 @@ class OpenDocumentTemplateComponent extends Component {
                         strpos($row['cells'][$i]['content'], $this->string_options['after']) !== false
                 ) {
                     /*
-                     * На этом этапе ещё рассмотреть возможность всталять данные 
-                     * по типу ячеек, чтобы была нормальная таблица
+                     * РќР° СЌС‚РѕРј СЌС‚Р°РїРµ РµС‰С‘ СЂР°СЃСЃРјРѕС‚СЂРµС‚СЊ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ РІСЃС‚Р°Р»СЏС‚СЊ РґР°РЅРЅС‹Рµ 
+                     * РїРѕ С‚РёРїСѓ СЏС‡РµРµРє, С‡С‚РѕР±С‹ Р±С‹Р»Р° РЅРѕСЂРјР°Р»СЊРЅР°СЏ С‚Р°Р±Р»РёС†Р°
                      */
 
                     $cell_type = $this->spreadsheet_cell_type(
@@ -877,8 +877,8 @@ class OpenDocumentTemplateComponent extends Component {
 
                             if (!empty($flatten_data[$field_name])) {
                                 /*
-                                 * А вот здесь можно читать из настроек
-                                 * по имени поля взять тип и точность
+                                 * Рђ РІРѕС‚ Р·РґРµСЃСЊ РјРѕР¶РЅРѕ С‡РёС‚Р°С‚СЊ РёР· РЅР°СЃС‚СЂРѕРµРє
+                                 * РїРѕ РёРјРµРЅРё РїРѕР»СЏ РІР·СЏС‚СЊ С‚РёРї Рё С‚РѕС‡РЅРѕСЃС‚СЊ
                                  */
                                 $row['cells'][$i]['content'] = $flatten_data[$field_name];
                                 $row['cells'][$i]['attr']['office:value'] = $flatten_data[$field_name];
@@ -1146,7 +1146,7 @@ class OpenDocumentTemplateComponent extends Component {
                             'id' => $expr_id
                         );
                         $expr_id++;
-                        //$Лист1.$A$5:$AMJ$5
+                        //$Р›РёСЃС‚1.$A$5:$AMJ$5
                         //table:cell-range-address
                     }
                 }
@@ -1261,7 +1261,7 @@ class OpenDocumentTemplateComponent extends Component {
                       'office:value' => '123',
                       'calcext:value-type' => 'currency'
                       ),
-                      'content' => '<text:p>123,00 руб.</text:p>'
+                      'content' => '<text:p>123,00 СЂСѓР±.</text:p>'
                       ),
                       (int) 2 => array(
                       'source' => '<table:table-cell office:value-type="float" office:value="128" calcext:value-type="float">',
@@ -1287,7 +1287,7 @@ class OpenDocumentTemplateComponent extends Component {
                       'office:value-type' => 'string',
                       'calcext:value-type' => 'string'
                       ),
-                      'content' => '<text:p>[Document.name] от [Document.date]</text:p>'
+                      'content' => '<text:p>[Document.name] РѕС‚ [Document.date]</text:p>'
                      */
                 }
 
@@ -1360,7 +1360,7 @@ class OpenDocumentTemplateComponent extends Component {
 
                 if ($cell_content[0] == ' ' || $cell_content[0] == '/') {
                     /*
-                     * Обычная ячейка
+                     * РћР±С‹С‡РЅР°СЏ СЏС‡РµР№РєР°
                      */
                     $cell_content = '<table:table-cell' . $cell_content;
                     $cell_closing_pair_pos = strpos($cell_content, '</table:table-cell>');
@@ -1576,7 +1576,7 @@ class OpenDocumentTemplateComponent extends Component {
             if (Configure::read('App.encoding') == 'CP1251')
             {
                 /*
-                 * Ошибка после ворда
+                 * РћС€РёР±РєР° РїРѕСЃР»Рµ РІРѕСЂРґР°
                  *  text:bullet-char="?"
                  */
                 $styles_xml = str_replace(chr(239) . chr(130) .  chr(183), '***', $styles_xml);
