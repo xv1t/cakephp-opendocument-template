@@ -18,7 +18,7 @@ As a result we optain a complete **files for the office packages** in a short ti
 
 
 ### Installation
-Is very easy. Put the file in the Controller/Component folder of your project and connect component in the AppController:
+Is very easy. Put the file "OpenDocumentTemplateComponent.php" in the Controller/Component folder of your project and connect component in the AppController:
 
 ```php
 public $components = array(
