@@ -30,7 +30,10 @@ class OpenDocumentTemplateComponent extends Component {
             $string_options = array('before' => '[', 'after' => ']' ),
             $tmpDirName = 'OpenDocumentTemplate',
             $userProfile = 'user',
-            $result_file;
+            $result_file,
+            $options,
+            $debug_mode = false,
+            $profiler;
 
     public function unzip($template_file = null) {
 
@@ -60,6 +63,30 @@ class OpenDocumentTemplateComponent extends Component {
         $this->content_dir = $tmp_dir;
 
         return $tmp_dir;
+    }
+    
+    private function hash_flatten($array){
+        //StopWatch::next('odf', 'hash_flatten');
+        
+        return Hash::flatten($array);
+    }
+    
+    private function debug($var, $message = null, $die = false){
+        if ($this->debug_mode){
+            if ($message)
+                debug(array(
+                    $message => $var
+                ));
+                else 
+                    debug($var);
+                if ($die)
+                    die('OpenDocumentTemplate::die');
+        }
+    }
+
+
+    private function string_insert($string, $data, $options = array()){
+        return String::insert($string, $data, $this->string_options);
     }
 
     public function zip($result_file) {
@@ -104,7 +131,7 @@ class OpenDocumentTemplateComponent extends Component {
              */
         }
 
-        $this->options = Hash::expand($this->meta_user);
+        $this->meta = Hash::expand($this->meta_user);
     }
 
     public function test1_data() {
@@ -285,12 +312,12 @@ class OpenDocumentTemplateComponent extends Component {
         );
     }
 
-    public function spreadsheet_render() {
+    private function spreadsheet_render() {
         /*
          * detect ranges
          */
         $expr_ix = 0;
-
+        
         foreach ($this->ods['named-expression'] as $expression_name => $expr) {
 
             $sheet_ix = 0;
@@ -309,17 +336,18 @@ class OpenDocumentTemplateComponent extends Component {
 
             foreach ($this->ods['office:spreadsheet']['table:table'] as $sheet) {
 
-                if ($sheet['attr']['table:name'] == $expr['sheet']) {
-                    /*
-                     * read cell templates
-                     */
+                if (!empty($sheet['attr']['table:name']))
+                    if ($sheet['attr']['table:name'] == $expr['sheet']) {
+                        /*
+                         * read cell templates
+                         */
 
-                    /* $range_rows = array_slice(
-                      $this->ods['office:spreadsheet']['table:table'][$sheet_ix]['rows'],
-                      $expr['start'] - 1,
-                      $expr['length']); */
-                }
-                $sheet_ix++;
+                        /* $range_rows = array_slice(
+                          $this->ods['office:spreadsheet']['table:table'][$sheet_ix]['rows'],
+                          $expr['start'] - 1,
+                          $expr['length']); */
+                    }
+                    $sheet_ix++;
             }
 
             $expr_ix++;
@@ -598,22 +626,27 @@ class OpenDocumentTemplateComponent extends Component {
          * при этом не забыв из изходного массива удалить циклические ключи на время рендеринга. вот!
          */
         $data_for_body = $this->data;
+        
+        
         foreach ($this->range_models as $model) {
             if (!empty($this->data[$model])) {
                 unset($data_for_body[$model]);
             }
         }
-        $this->data_for_body_flatten = Hash::flatten($data_for_body);
+        $this->data_for_body_flatten = $this->hash_flatten($data_for_body);
         /*
          * Делаем рендер тела всех листов
          */
 
+        
         for ($sheet_ix = 0; $sheet_ix < count($this->ods['office:spreadsheet']['table:table']); $sheet_ix++) {
             for ($i = 0; $i < count($this->ods['office:spreadsheet']['table:table'][$sheet_ix]['rows']); $i++) {
                 $row = $this->ods['office:spreadsheet']['table:table'][$sheet_ix]['rows'][$i];
-                $this->ods['office:spreadsheet']['table:table'][$sheet_ix]['rows'][$i] = $this->spreadsheet_render_row($row, $this->data_for_body_flatten);
+                $this->ods['office:spreadsheet']['table:table'][$sheet_ix]['rows'][$i] = 
+                        $this->spreadsheet_render_row($row, $this->data_for_body_flatten);
             }
         } 
+
 
         /*
          * Ну а теперь самое интересное
@@ -641,8 +674,17 @@ class OpenDocumentTemplateComponent extends Component {
                                  * с перечислениями и делать флаттен!!!!!!!
                                  */
                                 
+                                $datum0_for_flatten = $datum0;
+                                if (!empty($expr['children'])) {
+                                    foreach ($expr['children'] as $chi0_name){
+                                        if (!empty($datum0_for_flatten[$chi0_name]))
+                                            unset($chi0_name);
+                                    }
+                                }
+                                
                                 $datum_flatten0 = array_merge(
-                                        Hash::flatten($datum0), $this->data_for_body_flatten // Add a global values
+                                        $this->hash_flatten($datum0_for_flatten), 
+                                        $this->data_for_body_flatten // Add a global values
                                 );
                                 /*
                                  * применяем к строкам
@@ -673,7 +715,7 @@ class OpenDocumentTemplateComponent extends Component {
                                         if (!empty($datum0[$model1])) {
                                             foreach ($datum0[$model1] as $datum1) {
                                                 $datum_flatten1 = array_merge(
-                                                        Hash::flatten($datum1), $datum_flatten0, $this->data_for_body_flatten
+                                                        $this->hash_flatten($datum1), $datum_flatten0, $this->data_for_body_flatten
                                                 );
                                                 /*
                                                  * Мы на втором уровне
@@ -695,7 +737,7 @@ class OpenDocumentTemplateComponent extends Component {
                                                         if (!empty($datum1[$model2])) {
                                                             foreach ($datum1[$model2] as $datum2) {
                                                                 $datum_flatten2 = array_merge(
-                                                                        Hash::flatten($datum2), $datum_flatten1, $datum_flatten0, $this->data_for_body_flatten
+                                                                        $this->hash_flatten($datum2), $datum_flatten1, $datum_flatten0, $this->data_for_body_flatten
                                                                 );
                                                                 for ($i = 0; $i < count($this->range_templates[$expr2_name]); $i++) {
                                                                     $row2 = $this->range_templates[$expr2_name][$i];
@@ -762,6 +804,7 @@ class OpenDocumentTemplateComponent extends Component {
                             $this->ods['office:spreadsheet']['table:table'][$sheet_number]['rows'] = array_merge(
                                     $rows_before, $this->range_render[$expression_name], $rows_after
                             );
+
                         }
                     }
 
@@ -769,7 +812,7 @@ class OpenDocumentTemplateComponent extends Component {
                         if (!empty($this->data[$model])) {
                             foreach ($this->data[$model] as $datum) {
                                 $datum_flatten = array_merge(
-                                        Hash::flatten($datum), $this->data_for_body_flatten // Add a global values
+                                        $this->hash_flatten($datum), $this->data_for_body_flatten // Add a global values
                                 );
                                 /*
                                  * применяем к строкам
@@ -801,6 +844,22 @@ class OpenDocumentTemplateComponent extends Component {
         }
 
     }
+    
+    /*
+     * get only associate fields, sequence droped
+     */
+    private function get_object_array($array){
+        
+    }
+    
+    /*
+     * Check a array is a model item, not sequence
+     */
+    private function isAssoc($arr)
+    {
+        return array_keys($arr) !== range(0, count($arr) - 1);
+    }
+
 
     private function spreadsheet_get_current_range_pos($sheet_ix, $range_name) {
         $start = false;
@@ -880,16 +939,52 @@ class OpenDocumentTemplateComponent extends Component {
                                  * А вот здесь можно читать из настроек
                                  * по имени поля взять тип и точность
                                  */
-                                $row['cells'][$i]['content'] = $flatten_data[$field_name];
+                                $row['cells'][$i]['content'] = '<text:p>' .  str_replace('.', ',', $flatten_data[$field_name]) . '</text:p>';
                                 $row['cells'][$i]['attr']['office:value'] = $flatten_data[$field_name];
                             } else {
                                 $row['cells'][$i]['content'] = '<text:p></text:p>';
                             }
 
                             break;
+                        case 'draw':
+                            /* PNG
+                             * <draw:frame 
+                             *      table:end-cell-address="Sheet1.B9" 
+                             *      table:end-x="2.295cm" 
+                             *      table:end-y="0.034cm" 
+                             *      draw:z-index="2" 
+                             *      draw:name="IMAGE_TMP_NAME" 
+                             *      draw:style-name="gr1" 
+                             *      draw:text-style-name="P1" 
+                             *      svg:width="0.439cm" 
+                             *      svg:height="0.425cm" 
+                             *      svg:x="1.856cm" 
+                             *      svg:y="0.061cm">
+                             *   <draw:image 
+                             *              xlink:href="Pictures/10000201000000100000001000EBFC49.png" 
+                             *              xlink:type="simple" 
+                             *              xlink:show="embed" 
+                             *              xlink:actuate="onLoad">
+                             *    <text:p/>
+                             *   </draw:image>
+                             * <svg:title>IMAGE_HEADER_TITLE</svg:title>
+                             * <svg:desc>IMAGE_COMMENT</svg:desc>
+                             * </draw:frame>
+                             * 
+                             * JPEG
+                             * <draw:frame table:end-cell-address="Sheet1.B23" table:end-x="1.086cm" table:end-y="0.183cm" draw:z-index="4" draw:name="Изображение 4" draw:style-name="gr2" draw:text-style-name="P1" svg:width="1.086cm" svg:height="1.086cm" svg:x="0cm" svg:y="0cm">
+                             * <draw:image 
+                             *      xlink:href="Pictures/100000000000008000000080E9AF6BA0.jpg" 
+                             *      xlink:type="simple" xlink:show="embed" 
+                             *      xlink:actuate="onLoad">
+                             * <text:p/>
+                             * </draw:image>
+                             * </draw:frame>
+                             */
+                            break;
                         default:
-                            $row['cells'][$i]['content'] = String::insert(
-                                            $row['cells'][$i]['content'], $flatten_data, $this->string_options
+                            $row['cells'][$i]['content'] = $this->string_insert(
+                                            $row['cells'][$i]['content'], $flatten_data
                             );
                             break;
                     }
@@ -935,7 +1030,9 @@ class OpenDocumentTemplateComponent extends Component {
     private function spreadsheet_get_sheet_index($sheetname) {
         $sheet_ix = 0;
         foreach ($this->ods['office:spreadsheet']['table:table'] as $tbl) {
-            if ($tbl['attr']['table:name'] == $sheetname)
+            
+            if (!empty($tbl['attr']['table:name']))
+                if ($tbl['attr']['table:name'] == $sheetname)
                 return $sheet_ix;
             $sheet_ix++;
         }
@@ -1078,7 +1175,7 @@ class OpenDocumentTemplateComponent extends Component {
      * read structure from xml to
      */
 
-    public function read_spreadsheet_content() {
+    private function read_spreadsheet_content() {
         if (!$this->unzip())
             return false;
 
@@ -1214,19 +1311,20 @@ class OpenDocumentTemplateComponent extends Component {
         //   debug($ods);
     }
 
-    public function spreadsheet_build() {
+    private function spreadsheet_build() {
+        
         $content_xml[] = $this->ods['before'];
         $content_xml[] = '<office:spreadsheet>';
-
         foreach ($this->ods['office:spreadsheet']['table:table'] as $sheet) {
+             //StopWatch::next('spreadsheet_build', 'next_sheet');
             $sheet_xml = array();
             $sheet_xml[] = $sheet['source'];
             $sheet_xml[] = $sheet['columns'];
-
             foreach ($sheet['rows'] as $row_object) {
 
-                if ($row_object['content_num'] == 1 && !empty($row_object['content_first']))
-                    $sheet_xml[] = '<table:table-header-rows>';
+                if (!empty($row_object['content_num']))
+                    if ($row_object['content_num'] == 1 && !empty($row_object['content_first']))
+                        $sheet_xml[] = '<table:table-header-rows>';
 
 
                 $row_xml = array();
@@ -1253,48 +1351,15 @@ class OpenDocumentTemplateComponent extends Component {
 
                     $row_xml[] = $cell_xml;
 
-
-                    /*
-                     * 'table:style-name' => 'ce9',
-                      'office:value-type' => 'currency',
-                      'office:currency' => 'RUB',
-                      'office:value' => '123',
-                      'calcext:value-type' => 'currency'
-                      ),
-                      'content' => '<text:p>123,00 руб.</text:p>'
-                      ),
-                      (int) 2 => array(
-                      'source' => '<table:table-cell office:value-type="float" office:value="128" calcext:value-type="float">',
-                      'tagName' => 'table:table-cell',
-                      'attr' => array(
-                      'office:value-type' => 'float',
-                      'office:value' => '128',
-                      'calcext:value-type' => 'float'
-                      ),
-                      'content' => '<text:p>128</text:p>'
-                      ),
-                      (int) 3 => array(
-                      'source' => '<table:table-cell table:style-name="ce10" office:value-type="percentage" office:value="0.5" calcext:value-type="percentage">',
-                      'tagName' => 'table:table-cell',
-                      'attr' => array(
-                      'table:style-name' => 'ce10',
-                      'office:value-type' => 'percentage',
-                      'office:value' => '0.5',
-                      'calcext:value-type' => 'percentage'
-                     * 
-                     * 'attr' => array(
-                      'table:style-name' => 'ce4',
-                      'office:value-type' => 'string',
-                      'calcext:value-type' => 'string'
-                      ),
-                      'content' => '<text:p>[Document.name] от [Document.date]</text:p>'
-                     */
                 }
 
                 $row_xml[] = '</table:table-row>';
-
-                $sheet_xml = array_merge($sheet_xml, $row_xml);
-
+                
+                /*
+                 * Походу сдесь утекач памяти
+                 */
+            //    debug(count($sheet_xml));
+                $sheet_xml[] = implode( $row_xml);
 
 
 
@@ -1307,12 +1372,18 @@ class OpenDocumentTemplateComponent extends Component {
              */
 
             $sheet_xml[] = '</table:table>';
-            $content_xml = array_merge($content_xml, $sheet_xml);
+            
+            $content_xml[] = implode($sheet_xml);
         }
 
-        $content_xml[] = $this->ods['table:named-expressions_content'];
+        if (!empty($this->ods['table:named-expressions_content']))
+            $content_xml[] = $this->ods['table:named-expressions_content'];
         $content_xml[] = '</office:spreadsheet>';
         $content_xml[] = $this->ods['after'];
+        
+        
+       // debug(array('$content_xml' => $content_xml));
+        
         return implode($content_xml);
     }
 
@@ -1409,6 +1480,8 @@ class OpenDocumentTemplateComponent extends Component {
                 $result_rows[] = $row_tag;
             else {
                 $repeated = (int) $row_tag['attr']['table:number-rows-repeated'];
+                if ($repeated > 1000)
+                    $repeated = 1000;
                 $row_tag['repeated'] = true;
                 unset($row_tag['attr']['table:number-rows-repeated']);
                 for ($i = 0; $i < $repeated; $i++)
@@ -1437,6 +1510,8 @@ class OpenDocumentTemplateComponent extends Component {
     }
 
     function tag_text($tag, $options = array()) {
+
+        
         $t = '<' . $tag['tagName'];
 
         if (!empty($tag['attr'])) {
@@ -1492,47 +1567,6 @@ class OpenDocumentTemplateComponent extends Component {
         return $tag;
     }
 
-    private function ods_render_rows($rows_xml, $data, $options = array()) {
-        $result_rows_xml = array();
-
-        $flatten_data = Hash::flatten($data);
-
-        foreach ($rows_xml as $row_xml) {
-            $row_xml = String::insert($row_xml, $flatten_data, $this->string_options);
-
-            if (strpos($row_xml, '!!{') !== false) {
-
-                $data1_key = current(explode('}!!', end(explode('!!{', $row_xml))));
-
-                if (!empty($data[$data1_key])) {
-                    $number = 1;
-                    foreach ($data[$data1_key] as $datum1) {
-                        $flatten_datum = Hash::flatten($datum1);
-                        $flatten_datum['pos_number'] = $number;
-
-                        $result_rows_xml[] = String::insert($row_xml, array_merge($flatten_data, $flatten_datum));
-                        $number++;
-                    }
-                }
-
-            } else
-            if (strpos($row_xml, '!!!!TBODY33') !== false) {
-                $data1_key = 'DocumentDatum';
-                if (!empty($data[$data1_key])) {
-                    $number = 1;
-                    foreach ($data[$data1_key] as $datum1) {
-                        $flatten_datum = Hash::flatten($datum1);
-                        $flatten_datum['number'] = $number;
-                        $result_rows_xml[] = String::insert($row_xml, array_merge($flatten_data, $flatten_datum));
-                        $number++;
-                    }
-                }
-            } else
-                $result_rows_xml[] = $row_xml;
-        }
-
-        return $result_rows_xml;
-    }
 
     private function add_global_vars_to_data() {
         $this->data['Report']['time'] = date('H:i:s');
@@ -1550,9 +1584,9 @@ class OpenDocumentTemplateComponent extends Component {
             $content = iconv('utf8', 'cp1251', $content);
         }
         
-        $this->data_for_body_flatten = Hash::flatten($this->data);
+        $this->data_for_body_flatten = $this->hash_flatten($this->data);
         
-        return String::insert($content, $this->data_for_body_flatten, $this->string_options);
+        return $this->string_insert($content, $this->data_for_body_flatten);
     }
     
     public function odt($odt_template_file = null, $result_file, $data, $options = array()) {
@@ -1583,7 +1617,7 @@ class OpenDocumentTemplateComponent extends Component {
                 $styles_xml = iconv('utf8', 'cp1251', $styles_xml);
             }
 
-            $styles_xml = String::insert($styles_xml, $this->data_for_body_flatten, $this->string_options);
+            $styles_xml = $this->string_insert($styles_xml, $this->data_for_body_flatten);
 
             if (Configure::read('App.encoding') == 'CP1251')
                 $styles_xml = iconv('cp1251', 'utf8', $styles_xml);
@@ -1592,7 +1626,11 @@ class OpenDocumentTemplateComponent extends Component {
         }
         $this->zip($result_file);        
     }
+    
     public function ods($ods_template_file = null, $result_file, $data, $options = array()) {
+
+        $this->options = $options;
+        
         $this->filename = $ods_template_file;
         $this->data = $data;
         $this->add_global_vars_to_data();
@@ -1600,7 +1638,10 @@ class OpenDocumentTemplateComponent extends Component {
         $this->read_meta();
 
         $this->read_spreadsheet_content();
-        $this->spreadsheet_render();
+        
+        $this->debug($this->ods, 'ods', true);
+        
+        $this->spreadsheet_render();        
 
         $content_xml = $this->spreadsheet_build();
 
@@ -1608,6 +1649,8 @@ class OpenDocumentTemplateComponent extends Component {
             $content_xml = iconv('cp1251', 'utf8', $content_xml);
 
         file_put_contents($this->content_dir . DS . 'out' . DS . 'content.xml', $content_xml);
+
+        
         /*
          * work on styles.xml
          */
@@ -1616,12 +1659,13 @@ class OpenDocumentTemplateComponent extends Component {
             if (Configure::read('App.encoding') == 'CP1251')
                 $styles_xml = iconv('utf8', 'cp1251', $styles_xml);
 
-            $styles_xml = String::insert($styles_xml, $this->data_for_body_flatten, $this->string_options);
+            $styles_xml = $this->string_insert($styles_xml, $this->data_for_body_flatten);
 
             if (Configure::read('App.encoding') == 'CP1251')
                 $styles_xml = iconv('cp1251', 'utf8', $styles_xml);
 
             file_put_contents($this->content_dir . DS . 'out' . DS . 'styles.xml', $styles_xml);
+
         }
         $this->zip($result_file);
     }
